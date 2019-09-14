@@ -20,6 +20,11 @@ uint16_t tcounter{ 3 }; // 3 second countdown
 uint16_t seconds{ 0 };
 unsigned long timer;
 
+// Set up repreating countdown
+uint16_t mainNumber{ 1000 };
+uint8_t mainTimer{ 3 };
+uint8_t randomMod{ random(40, 51) };
+
 enum class GameStatus : uint8_t {
   Reset,
   Introduction,
@@ -47,18 +52,19 @@ struct Entity {
   }
   
   void showCard() {
-    Sprites::drawOverwrite(x + (getImageWidth(placeholder) / 2) - (getImageWidth(number_card) / 2), y - 32, number_card, 0);
+    Sprites::drawOverwrite(x + (getImageWidth(placeholder) / 2) - (getImageWidth(numberCard) / 2), y - 32, numberCard, 0);
   }
   
   int showCardNumber() {
-    arduboy.setCursor(x + (getImageWidth(number_card) / 2) - (8 / 2), 16);
+    arduboy.setCursor(x + (getImageWidth(numberCard)), y - (getImageHeight(numberCard) / 2) - (8));
+    arduboy.setTextSize(2);
     arduboy.print(cardNumber);
     return cardNumber;
   }
 };
 
 Entity player {
-  24,
+  8,
   32,
   random(1, 10),
   false,
@@ -67,7 +73,7 @@ Entity player {
 };
 
 Entity enemy {
-  72,
+  (WIDTH - getImageWidth(placeholder)) - 8,
   32,
   random(1, 10),
   false,

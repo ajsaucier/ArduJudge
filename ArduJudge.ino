@@ -43,6 +43,7 @@ void loop() {
       break;
       
   }
+  
 
   arduboy.display();
 }

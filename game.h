@@ -8,17 +8,9 @@ void resetGame() {
   enemy.cardNumber = random(1, 10);
 }
 
-int secondCountdown() {
-  timer = millis();
-  seconds = (timer/1000);
-  
-  if ((tcounter - seconds) > 3 || (tcounter - seconds) == 0) {
-    timer = 0;
-    seconds = 0;
-    tcounter = 0;
-  }
-  
-  return (tcounter - seconds);
+void resetCardNumbers() {
+  player.cardNumber = random(1, 10);
+  enemy.cardNumber = random(1, 10);
 }
 
 void showPlayerScore() {
@@ -29,9 +21,24 @@ void showEnemyScore() {
   
 }
 
+int countDown() {
+  if (mainNumber > 0) {
+    --mainNumber;
+  }
+  
+  if (mainNumber % randomMod == 0 && mainTimer > 0)
+    --mainTimer;
+  
+  return mainTimer;
+}
+
+void showScores() {
+  
+}
+
 void showCountdown() {
   arduboy.setCursor((WIDTH / 2) - 4, 8);
-  arduboy.print(secondCountdown());
+  Sprites::drawPlusMask((WIDTH / 2) - 4, 8, counterArrows_plus_mask, countDown());
 }
 
 void drawPlayer() {
@@ -47,14 +54,37 @@ void drawCards() {
   enemy.showCard();
   player.showCardNumber();
   enemy.showCardNumber();
+  
+ if (player.cardNumber > enemy.cardNumber) {
+    arduboy.setCursor(0, 0);
+    arduboy.print(F("player!"));
+  } else {
+    arduboy.print(F("enemy!"));
+  }
+  
+ if (player.cardNumber == enemy.cardNumber) {
+    arduboy.setCursor(0, 0);
+    arduboy.print(F("uh oh!"));
+  }
 }
 
 void playGame() {
+  countDown();
   showCountdown();
   drawPlayer();
   drawEnemy();
-  if (!secondCountdown())
+  if (mainTimer == 0) {
     drawCards();
+  }
+  if (arduboy.justPressed(A_BUTTON)) {
+    resetCardNumbers();
+    mainTimer = 3;
+    mainNumber = 1000;
+    randomMod = random(40, 51);
+    countDown();
+    if (mainTimer == 0) 
+      drawCards();
+  }
 }
 
 #endif
