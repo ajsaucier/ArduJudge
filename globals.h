@@ -20,10 +20,13 @@ uint16_t tcounter{ 3 }; // 3 second countdown
 uint16_t seconds{ 0 };
 unsigned long timer;
 
+bool inGame{ false };
+bool turnComplete{ false };
+
 // Set up repreating countdown
 uint16_t mainNumber{ 1000 };
 uint8_t mainTimer{ 3 };
-uint8_t randomMod{ random(40, 51) };
+uint8_t randomMod{ random(30, 51) };
 
 enum class GameStatus : uint8_t {
   Reset,
