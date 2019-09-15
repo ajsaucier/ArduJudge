@@ -31,7 +31,7 @@ void resetTimers() {
   resetCardNumbers();
   mainTimerSeconds = 3;
   mainCountdownNumber = 1000;
-  inGameTimer = 20;
+  inGameTimer = 30;
 }
 
 int countDown() {
@@ -81,42 +81,50 @@ void mainAction() {
   if (player.cardNumber > enemy.cardNumber || player.cardNumber == enemy.cardNumber) {
     --inGameTimer;
     // Enemy AI
-    if (inGameTimer == 0) {
-      if (random(0, 3) == 1) {
-        dodgeHammer(enemy);
-        enemyScore += 2;
-      } else {
-        swingHammer(enemy);
-        playerScore += 2;
+    if (!didPressButton) {
+      if (inGameTimer == 0) {
+        if (random(0, 3) == 1) {
+          dodgeHammer(enemy);
+          enemyScore += 2;
+        } else {
+          swingHammer(enemy);
+          playerScore += 2;
+        }
       }
     }
     // Player control
     if (arduboy.justPressed(A_BUTTON)) {
       swingHammer(player);
       playerScore += 3;
+      didPressButton = true;
     } else if (arduboy.justPressed(B_BUTTON)) {
       dodgeHammer(player);
       enemyScore += 2;
+      didPressButton = true;
     }
   } else {
     --inGameTimer;
     // Enemy AI
-    if (inGameTimer == 0) {
-      if (random(0, 3) == 1) {
-        swingHammer(enemy);
-        enemyScore += 3;
-      } else {
-        dodgeHammer(enemy);
-        playerScore += 3;
+    if (!didPressButton) {
+      if (inGameTimer == 0) {
+        if (random(0, 3) == 1) {
+          swingHammer(enemy);
+          enemyScore += 3;
+        } else {
+          dodgeHammer(enemy);
+          playerScore += 3;
+        }
       }
     }
     // Player control
     if (arduboy.justPressed(A_BUTTON)) {
       swingHammer(player);
-      countDown();
+      enemyScore += 3;
+      didPressButton = true;
     } else if (arduboy.justPressed(B_BUTTON)) {
       dodgeHammer(player);
       playerScore += 2;
+      didPressButton = true;
     }
   }
   // If the time is up and player hasn't hit either button
@@ -125,6 +133,7 @@ void mainAction() {
     inGame = false;
     resetTimers();
     countDown();
+    didPressButton = false;
   }
 }
 

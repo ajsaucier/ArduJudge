@@ -21,17 +21,21 @@ uint16_t seconds{ 0 };
 unsigned long timer;
 
 bool inGame{ false };
-bool turnComplete{ false };
-uint8_t inGameTimer{ 20 };
+
+// Amount of time for player to press a button
+uint8_t inGameTimer{ 30 };
 
 // 
-// Set up repreating countdown
+// Set up repreating countdowns
 // 
 
 // Amount of time for 3...2...1 countdown
 uint16_t mainCountdownNumber{ 1000 };
 uint8_t mainTimerSeconds{ 3 };
 uint8_t randomMod{ random(30, 51) };
+
+// Check for a pressed button and keep count
+bool didPressButton{ false };
 
 enum class GameStatus : uint8_t {
   Reset,
