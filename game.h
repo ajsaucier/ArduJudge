@@ -27,25 +27,22 @@ void showEnemyScore() {
   arduboy.print(enemyScore);
 }
 
-void resetTimer() {
+void resetTimers() {
   resetCardNumbers();
-  mainTimer = 3;
-  mainNumber = 1000;
+  mainTimerSeconds = 3;
+  mainCountdownNumber = 1000;
+  inGameTimer = 20;
 }
 
 int countDown() {
-  if (mainNumber > 0) {
-    --mainNumber;
+  if (mainCountdownNumber > 0) {
+    --mainCountdownNumber;
   }
   
-  if (mainNumber % 50 == 0 && mainTimer > 0)
-    --mainTimer;
+  if (mainCountdownNumber % 50 == 0 && mainTimerSeconds > 0)
+    --mainTimerSeconds;
   
-  return mainTimer;
-}
-
-void showScores() {
-  
+  return mainTimerSeconds;
 }
 
 void showCountdown() {
@@ -82,51 +79,52 @@ void drawCards() {
 
 void mainAction() {
   if (player.cardNumber > enemy.cardNumber || player.cardNumber == enemy.cardNumber) {
+    --inGameTimer;
     // Enemy AI
-    // if (random(0, 3) == 1) {
-    //   dodgeHammer(enemy);
-    //   enemyScore += 2;
-    // } else {
-    //   swingHammer(enemy);
-    //   playerScore += 2;
-    // }
+    if (inGameTimer == 0) {
+      if (random(0, 3) == 1) {
+        dodgeHammer(enemy);
+        enemyScore += 2;
+      } else {
+        swingHammer(enemy);
+        playerScore += 2;
+      }
+    }
     // Player control
     if (arduboy.justPressed(A_BUTTON)) {
       swingHammer(player);
       playerScore += 3;
-      inGame = false;
-      resetTimer();
-      countDown();
     } else if (arduboy.justPressed(B_BUTTON)) {
       dodgeHammer(player);
       enemyScore += 2;
-      inGame = false;
-      resetTimer();
-      countDown();
     }
   } else {
+    --inGameTimer;
     // Enemy AI
-    // if (random(0, 3) == 1) {
-    //   swingHammer(enemy);
-    //   enemyScore += 3;
-    // } else {
-    //   dodgeHammer(enemy);
-    //   playerScore += 3;
-    // }
+    if (inGameTimer == 0) {
+      if (random(0, 3) == 1) {
+        swingHammer(enemy);
+        enemyScore += 3;
+      } else {
+        dodgeHammer(enemy);
+        playerScore += 3;
+      }
+    }
     // Player control
     if (arduboy.justPressed(A_BUTTON)) {
       swingHammer(player);
-      enemyScore += 3;
-      inGame = false;
-      resetTimer();
       countDown();
     } else if (arduboy.justPressed(B_BUTTON)) {
       dodgeHammer(player);
       playerScore += 2;
-      inGame = false;
-      resetTimer();
-      countDown();
     }
+  }
+  // If the time is up and player hasn't hit either button
+  // have the enemy make a decision and restart all timers
+  if (inGameTimer == 0) {
+    inGame = false;
+    resetTimers();
+    countDown();
   }
 }
 
@@ -137,20 +135,20 @@ void playGame() {
   showCountdown();
   drawPlayer();
   drawEnemy();
-  if (mainTimer == 0) {
+  if (mainTimerSeconds == 0) {
     inGame = true;
-    drawCards();
   }
   if (inGame) {
+    drawCards();
     mainAction();
   }
 
   // if (arduboy.justPressed(A_BUTTON)) {
   //   resetCardNumbers();
-  //   mainTimer = 3;
-  //   mainNumber = 1000;
+  //   mainTimerSeconds = 3;
+  //   mainCountdownNumber = 1000;
   //   countDown();
-  //   if (mainTimer == 0) 
+  //   if (mainTimerSeconds == 0) 
   //     drawCards();
   // }
 }
