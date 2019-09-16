@@ -17,7 +17,7 @@ uint8_t playerNumber{ 0 }; // 1 through 9
 uint8_t enemyNumber{ 0 };
 
 // Get action from players
-bool playerSwungHammer{ false};
+bool playerSwungHammer{ false };
 bool playerDodgedHammer{ false };
 bool enemySwungHammer{ false };
 bool enemyDodgedHammer{ false };
@@ -29,7 +29,7 @@ unsigned long timer;
 bool inGame{ false };
 
 // Amount of time for player to press a button
-uint8_t inGameTimer{ 32 };
+uint8_t inGameTimer{ 22 };
 
 // 
 // Set up repreating countdowns
@@ -62,16 +62,12 @@ struct Entity {
   bool didDodgeHammer;
   const uint8_t *image;
   
-  void swingHammer() {
-    
-  }
-  
-  void dodgeHammer() {
-    
-  }
-  
   void showCard() {
     Sprites::drawOverwrite(x + (getImageWidth(characterHold) / 2) - (getImageWidth(numberCard) / 2), y - 32, numberCard, 0);
+  }
+  
+  void hideCard() {
+    Sprites::drawErase(x + (getImageWidth(characterHold) / 2) - (getImageWidth(numberCard) / 2), y - 32, numberCard, 0);
   }
   
   int showCardNumber() {

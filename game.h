@@ -6,6 +6,8 @@
 void resetGame() {
   player.cardNumber = random(1, 10);
   enemy.cardNumber = random(1, 10);
+  playerScore = 0;
+  enemyScore = 0;
 }
 
 void resetCardNumbers() {
@@ -33,7 +35,7 @@ void resetTimers() {
   resetCardNumbers();
   mainTimerSeconds = 3;
   mainCountdownNumber = 1000;
-  inGameTimer = 32;
+  inGameTimer = 22;
   playerSwungHammer = false;
   enemySwungHammer = false;
   playerDodgedHammer = false;
@@ -57,8 +59,6 @@ void showCountdown() {
 }
 
 void drawPlayer() {
-  arduboy.setCursor(0, 16);
-  arduboy.print(inGameTimer);
   Sprites::drawOverwrite(player.x, player.y, player.image, 0);
   if (player.isHoldingCard) {
     Sprites::drawOverwrite(player.x, player.y, characterHold, 0);
@@ -68,6 +68,10 @@ void drawPlayer() {
   }
   if (enemySwungHammer) {
     Sprites::drawOverwrite(player.x, player.y, characterHit, 0);
+  }
+  if (playerDodgedHammer) {
+    Sprites::drawOverwrite(player.x, player.y, characterDodge, 0);
+    player.isHoldingCard = false;
   }
 }
 
@@ -82,11 +86,23 @@ void drawEnemy() {
   if (playerSwungHammer) {
     Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedHit, 0);
   }
+  if (enemyDodgedHammer) {
+    Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedDodge, 0);
+    enemy.isHoldingCard = false;
+  }
 }
 
 void drawCards() {
-  player.showCard();
-  enemy.showCard();
+  if (!playerDodgedHammer) {
+    player.showCard();
+  } else {
+    player.hideCard();
+  }
+  if (!enemyDodgedHammer) {
+    enemy.showCard();
+  } else {
+    enemy.hideCard();
+  }
   player.showCardNumber();
   enemy.showCardNumber();
   player.isHoldingCard = true;
@@ -168,15 +184,15 @@ void playGame() {
     drawCards();
     mainAction();
   }
-
-  // if (arduboy.justPressed(A_BUTTON)) {
-  //   resetCardNumbers();
-  //   mainTimerSeconds = 3;
-  //   mainCountdownNumber = 1000;
-  //   countDown();
-  //   if (mainTimerSeconds == 0) 
-  //     drawCards();
-  // }
+  if (playerScore >= 99) {
+    gameStatus = GameStatus::GameOver;
+    arduboy.setCursor(0, 24);
+    arduboy.print(F("You won!"));
+  } else if (enemyScore >= 99){
+    gameStatus = GameStatus::GameOver;
+    arduboy.setCursor(0, 24);
+    arduboy.print(F("You lost!"));
+  }
 }
 
 #endif
