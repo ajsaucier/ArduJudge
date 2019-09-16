@@ -11,6 +11,8 @@ void resetGame() {
 void resetCardNumbers() {
   player.cardNumber = random(1, 10);
   enemy.cardNumber = random(1, 10);
+  player.isHoldingCard = false;
+  enemy.isHoldingCard = false;
 }
 
 void showPlayerScore() {
@@ -31,7 +33,11 @@ void resetTimers() {
   resetCardNumbers();
   mainTimerSeconds = 3;
   mainCountdownNumber = 1000;
-  inGameTimer = 30;
+  inGameTimer = 32;
+  playerSwungHammer = false;
+  enemySwungHammer = false;
+  playerDodgedHammer = false;
+  enemyDodgedHammer= false;
 }
 
 int countDown() {
@@ -51,23 +57,31 @@ void showCountdown() {
 }
 
 void drawPlayer() {
-  Sprites::drawSelfMasked(player.x, player.y, player.image, 0);
+  arduboy.setCursor(0, 16);
+  arduboy.print(inGameTimer);
+  Sprites::drawOverwrite(player.x, player.y, player.image, 0);
+  if (player.isHoldingCard) {
+    Sprites::drawOverwrite(player.x, player.y, characterHold, 0);
+  }
+  if (playerSwungHammer) {
+    Sprites::drawOverwrite(player.x, player.y, characterSwing, 0);
+  }
+  if (enemySwungHammer) {
+    Sprites::drawOverwrite(player.x, player.y, characterHit, 0);
+  }
 }
 
 void drawEnemy() {
-  Sprites::drawSelfMasked(enemy.x, enemy.y, enemy.image, 0);
-}
-
-void swingHammer(Entity entity) {
-  entity.didSwingHammer = true;
-  entity.didDodgeHammer = false;
-  // Draw sprite with hammer swung
-}
-
-void dodgeHammer(Entity entity) {
-  entity.didDodgeHammer = true;
-  entity.didDodgeHammer = false;
-  // Draw sprite with hammer swung
+  Sprites::drawOverwrite(enemy.x, enemy.y, enemy.image, 0);
+  if (enemy.isHoldingCard) {
+    Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedHold, 0);
+  }
+  if (enemySwungHammer) {
+    Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedSwing, 0);
+  }
+  if (playerSwungHammer) {
+    Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedHit, 0);
+  }
 }
 
 void drawCards() {
@@ -75,6 +89,8 @@ void drawCards() {
   enemy.showCard();
   player.showCardNumber();
   enemy.showCardNumber();
+  player.isHoldingCard = true;
+  enemy.isHoldingCard = true;
 }
 
 void mainAction() {
@@ -82,23 +98,23 @@ void mainAction() {
     --inGameTimer;
     // Enemy AI
     if (!didPressButton) {
-      if (inGameTimer == 0) {
-        if (random(0, 3) == 1) {
-          dodgeHammer(enemy);
+      if (inGameTimer == 2) {
+        if (random(0, 2) == 1) {
+          enemyDodgedHammer = true;
           enemyScore += 2;
         } else {
-          swingHammer(enemy);
+          enemySwungHammer = true;
           playerScore += 2;
         }
       }
     }
     // Player control
     if (arduboy.justPressed(A_BUTTON)) {
-      swingHammer(player);
+      playerSwungHammer = true;
       playerScore += 3;
       didPressButton = true;
     } else if (arduboy.justPressed(B_BUTTON)) {
-      dodgeHammer(player);
+      playerDodgedHammer = true;
       enemyScore += 2;
       didPressButton = true;
     }
@@ -106,23 +122,23 @@ void mainAction() {
     --inGameTimer;
     // Enemy AI
     if (!didPressButton) {
-      if (inGameTimer == 0) {
-        if (random(0, 3) == 1) {
-          swingHammer(enemy);
+      if (inGameTimer == 2) {
+        if (random(0, 2) == 1) {
+          enemySwungHammer = true;
           enemyScore += 3;
         } else {
-          dodgeHammer(enemy);
+          enemyDodgedHammer = true;
           playerScore += 3;
         }
       }
     }
     // Player control
     if (arduboy.justPressed(A_BUTTON)) {
-      swingHammer(player);
+      playerSwungHammer = true;
       enemyScore += 3;
       didPressButton = true;
     } else if (arduboy.justPressed(B_BUTTON)) {
-      dodgeHammer(player);
+      playerDodgedHammer = true;
       playerScore += 2;
       didPressButton = true;
     }
@@ -131,6 +147,7 @@ void mainAction() {
   // have the enemy make a decision and restart all timers
   if (inGameTimer == 0) {
     inGame = false;
+    delay(3000);
     resetTimers();
     countDown();
     didPressButton = false;

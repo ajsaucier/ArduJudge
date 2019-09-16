@@ -16,6 +16,12 @@ uint8_t enemyScore{ 0 };
 uint8_t playerNumber{ 0 }; // 1 through 9
 uint8_t enemyNumber{ 0 };
 
+// Get action from players
+bool playerSwungHammer{ false};
+bool playerDodgedHammer{ false };
+bool enemySwungHammer{ false };
+bool enemyDodgedHammer{ false };
+
 uint16_t tcounter{ 3 }; // 3 second countdown
 uint16_t seconds{ 0 };
 unsigned long timer;
@@ -23,7 +29,7 @@ unsigned long timer;
 bool inGame{ false };
 
 // Amount of time for player to press a button
-uint8_t inGameTimer{ 30 };
+uint8_t inGameTimer{ 32 };
 
 // 
 // Set up repreating countdowns
@@ -51,6 +57,7 @@ struct Entity {
   int8_t x;
   int8_t y;
   int8_t cardNumber;
+  bool isHoldingCard;
   bool didSwingHammer;
   bool didDodgeHammer;
   const uint8_t *image;
@@ -64,7 +71,7 @@ struct Entity {
   }
   
   void showCard() {
-    Sprites::drawOverwrite(x + (getImageWidth(placeholder) / 2) - (getImageWidth(numberCard) / 2), y - 32, numberCard, 0);
+    Sprites::drawOverwrite(x + (getImageWidth(characterHold) / 2) - (getImageWidth(numberCard) / 2), y - 32, numberCard, 0);
   }
   
   int showCardNumber() {
@@ -81,16 +88,18 @@ Entity player {
   random(1, 10),
   false,
   false,
-  placeholder
+  false,
+  character
 };
 
 Entity enemy {
-  (WIDTH - getImageWidth(placeholder)) - 8,
+  (WIDTH - getImageWidth(characterHold)) - 8,
   32,
   random(1, 10),
   false,
   false,
-  placeholder
+  false,
+  characterFlipped
 };
 
 #endif
