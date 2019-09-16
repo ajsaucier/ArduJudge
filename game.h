@@ -35,11 +35,28 @@ void resetTimers() {
   resetCardNumbers();
   mainTimerSeconds = 3;
   mainCountdownNumber = 1000;
-  inGameTimer = 22;
+  inGameTimer = 25;
   playerSwungHammer = false;
   enemySwungHammer = false;
   playerDodgedHammer = false;
   enemyDodgedHammer= false;
+}
+
+void playBeepSounds(uint8_t event) {
+  if (arduboy.audio.enabled()) {
+    switch (event) {
+      case 0:
+        sound.tone(NOTE_E5, 50);
+        arduboy.setCursor(0, 32);
+        arduboy.print(F("b0"));
+        break;
+      case 1:
+        sound.tone(NOTE_E5, 50);
+        arduboy.setCursor(0, 32);
+        arduboy.print(F("b1"));
+        break;
+    }
+  }
 }
 
 int countDown() {
@@ -47,8 +64,14 @@ int countDown() {
     --mainCountdownNumber;
   }
   
-  if (mainCountdownNumber % 50 == 0 && mainTimerSeconds > 0)
+  if (mainTimerSeconds == 3) {
+    sound.tone(NOTE_E5, 50);
+  }
+  
+  if (mainCountdownNumber % 50 == 0 && mainTimerSeconds > 0) {
     --mainTimerSeconds;
+    sound.tone(NOTE_E5, 50);
+  }
   
   return mainTimerSeconds;
 }
@@ -110,6 +133,9 @@ void drawCards() {
 }
 
 void mainAction() {
+  if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON))
+    sound.tone(NOTE_E5, 50);
+    
   if (player.cardNumber > enemy.cardNumber || player.cardNumber == enemy.cardNumber) {
     --inGameTimer;
     // Enemy AI
@@ -122,6 +148,7 @@ void mainAction() {
           enemySwungHammer = true;
           playerScore += 2;
         }
+        sound.tone(NOTE_E5, 50);
       }
     }
     // Player control
@@ -146,6 +173,7 @@ void mainAction() {
           enemyDodgedHammer = true;
           playerScore += 3;
         }
+        sound.tone(NOTE_E5, 50);
       }
     }
     // Player control

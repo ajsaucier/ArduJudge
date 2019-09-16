@@ -29,7 +29,7 @@ unsigned long timer;
 bool inGame{ false };
 
 // Amount of time for player to press a button
-uint8_t inGameTimer{ 22 };
+uint8_t inGameTimer{ 25 };
 
 // 
 // Set up repreating countdowns
@@ -42,6 +42,17 @@ uint8_t randomMod{ random(30, 51) };
 
 // Check for a pressed button and keep count
 bool didPressButton{ false };
+
+// Add ability to turn on or off beep sounds
+void toggleSoundSettings() {
+  
+  if (arduboy.audio.enabled()) {
+    arduboy.audio.off();
+  } else {
+    arduboy.audio.on();
+  }
+  arduboy.audio.saveOnOff();
+}
 
 enum class GameStatus : uint8_t {
   Reset,
