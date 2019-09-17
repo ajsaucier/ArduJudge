@@ -36,9 +36,14 @@ uint8_t inGameTimer{ 25 };
 // 
 
 // Amount of time for 3...2...1 countdown
+// Increase for longer time betwen counts
 uint16_t mainCountdownNumber{ 1000 };
 uint8_t mainTimerSeconds{ 3 };
-uint8_t randomMod{ random(30, 51) };
+
+// Increase to slow down time between 3...2...1
+uint8_t timeBetweenCounts{ 40 };
+
+// uint8_t randomMod{ random(30, 51) };
 
 // Check for a pressed button and keep count
 bool didPressButton{ false };
@@ -65,9 +70,9 @@ GameStatus gameStatus {GameStatus::Reset}; // for production
 // GameStatus gameStatus {GameStatus::PlayGame}; // for testing
 
 struct Entity {
-  int8_t x;
-  int8_t y;
-  int8_t cardNumber;
+  uint8_t x;
+  uint8_t y;
+  uint8_t cardNumber;
   bool isHoldingCard;
   bool didSwingHammer;
   bool didDodgeHammer;
@@ -92,7 +97,7 @@ struct Entity {
 Entity player {
   8,
   32,
-  random(1, 10),
+  static_cast<uint8_t>(random(1, 10)),
   false,
   false,
   false,
@@ -100,9 +105,9 @@ Entity player {
 };
 
 Entity enemy {
-  (WIDTH - getImageWidth(characterHold)) - 8,
+  static_cast<uint8_t>((WIDTH - getImageWidth(characterHold)) - 8),
   32,
-  random(1, 10),
+  static_cast<uint8_t>(random(1, 10)),
   false,
   false,
   false,

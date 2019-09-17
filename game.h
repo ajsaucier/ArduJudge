@@ -4,8 +4,6 @@
 #include "globals.h"
 
 void resetGame() {
-  player.cardNumber = random(1, 10);
-  enemy.cardNumber = random(1, 10);
   playerScore = 0;
   enemyScore = 0;
 }
@@ -42,35 +40,19 @@ void resetTimers() {
   enemyDodgedHammer= false;
 }
 
-void playBeepSounds(uint8_t event) {
-  if (arduboy.audio.enabled()) {
-    switch (event) {
-      case 0:
-        sound.tone(NOTE_E5, 50);
-        arduboy.setCursor(0, 32);
-        arduboy.print(F("b0"));
-        break;
-      case 1:
-        sound.tone(NOTE_E5, 50);
-        arduboy.setCursor(0, 32);
-        arduboy.print(F("b1"));
-        break;
-    }
-  }
-}
-
 int countDown() {
   if (mainCountdownNumber > 0) {
+    if (mainCountdownNumber == 1000) {
+      sound.tone(NOTE_E5, 50);
+    }
     --mainCountdownNumber;
   }
   
-  if (mainTimerSeconds == 3) {
-    sound.tone(NOTE_E5, 50);
-  }
-  
-  if (mainCountdownNumber % 50 == 0 && mainTimerSeconds > 0) {
+  if (mainCountdownNumber % timeBetweenCounts == 0 && mainTimerSeconds > 0) {
     --mainTimerSeconds;
     sound.tone(NOTE_E5, 50);
+    if (mainTimerSeconds == 0)
+      sound.tone(NOTE_G5, 50);
   }
   
   return mainTimerSeconds;
@@ -134,21 +116,21 @@ void drawCards() {
 
 void mainAction() {
   if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON))
-    sound.tone(NOTE_E5, 50);
+    sound.tone(NOTE_G5, 50);
     
   if (player.cardNumber > enemy.cardNumber || player.cardNumber == enemy.cardNumber) {
     --inGameTimer;
     // Enemy AI
     if (!didPressButton) {
       if (inGameTimer == 2) {
-        if (random(0, 2) == 1) {
-          enemyDodgedHammer = true;
-          enemyScore += 2;
-        } else {
+        if (random(0, 3) == 1) {
           enemySwungHammer = true;
           playerScore += 2;
+        } else {
+          enemyDodgedHammer = true;
+          enemyScore += 2;
         }
-        sound.tone(NOTE_E5, 50);
+        sound.tone(NOTE_G5, 50);
       }
     }
     // Player control
@@ -166,14 +148,14 @@ void mainAction() {
     // Enemy AI
     if (!didPressButton) {
       if (inGameTimer == 2) {
-        if (random(0, 2) == 1) {
-          enemySwungHammer = true;
-          enemyScore += 3;
-        } else {
+        if (random(0, 3) == 1) {
           enemyDodgedHammer = true;
           playerScore += 3;
+        } else {
+          enemySwungHammer = true;
+          enemyScore += 3;
         }
-        sound.tone(NOTE_E5, 50);
+        sound.tone(NOTE_G5, 50);
       }
     }
     // Player control
@@ -198,6 +180,30 @@ void mainAction() {
   }
 }
 
+void introduction() {
+  arduboy.setCursor(8, 8);
+  arduboy.setTextSize(2);
+  arduboy.print(F("ArduJudge"));
+  arduboy.setTextSize(1);
+  arduboy.setCursor(32, 32);
+  arduboy.print(F("(A) Start"));
+  arduboy.setCursor(32, 42);
+  arduboy.print(F("(B) Sound "));
+  if (arduboy.audio.enabled()) {
+    arduboy.print(F("on"));
+  } else {
+    arduboy.print(F("off"));
+  }
+  
+  if (arduboy.justPressed(A_BUTTON)) {
+    gameStatus = GameStatus::PlayGame;
+  }
+  
+  if (arduboy.justPressed(B_BUTTON)) {
+    toggleSoundSettings();
+  }
+}
+
 void playGame() {
   showPlayerScore();
   showEnemyScore();
@@ -212,15 +218,32 @@ void playGame() {
     drawCards();
     mainAction();
   }
-  if (playerScore >= 99) {
+  if (playerScore >= 99 || enemyScore >= 99) {
     gameStatus = GameStatus::GameOver;
-    arduboy.setCursor(0, 24);
-    arduboy.print(F("You won!"));
-  } else if (enemyScore >= 99){
-    gameStatus = GameStatus::GameOver;
-    arduboy.setCursor(0, 24);
-    arduboy.print(F("You lost!"));
   }
+}
+
+void gameOver() {
+  arduboy.setCursor(8, 8);
+  arduboy.setTextSize(2);
+  arduboy.print(F("Game Over"));
+  arduboy.setTextSize(1);
+  if (playerScore >= 99) {
+    arduboy.setCursor(32, 32);
+    arduboy.print(F("You Won!"));
+    arduboy.setCursor(32, 42);
+    arduboy.print(F("(A) Start Over"));
+  } else if (enemyScore >= 99){
+    arduboy.setCursor(32, 32);
+    arduboy.print(F("You lost!"));
+    arduboy.setCursor(32, 42);
+    arduboy.print(F("(A) Start Over"));
+  }
+  
+  if (arduboy.justPressed(A_BUTTON)) {
+    gameStatus = GameStatus::Reset;
+  }
+  
 }
 
 #endif

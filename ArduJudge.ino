@@ -5,8 +5,8 @@
 #include "game.h"
 
 void setup() {
-  // arduboy.begin();
-  arduboy.boot();
+  arduboy.begin();
+  // arduboy.boot();
   arduboy.setFrameRate(30);
 
   // initialize things here
@@ -26,11 +26,10 @@ void loop() {
 
     case GameStatus::Reset:
       resetGame();
-      gameStatus = GameStatus::PlayGame;
+      gameStatus = GameStatus::Introduction;
     
     case GameStatus::Introduction:
-      arduboy.setCursor(0, 0);
-      arduboy.print(F("Intro"));
+      introduction();
       break;
 
     case GameStatus::PlayGame:
@@ -38,12 +37,10 @@ void loop() {
       break;
 
     case GameStatus::GameOver:
-      arduboy.setCursor(0, 0);
-      arduboy.print(F("Game Over"));
+      gameOver();
       break;
       
   }
-  
 
   arduboy.display();
 }
