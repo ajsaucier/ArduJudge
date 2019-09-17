@@ -3,6 +3,11 @@
 
 #include "globals.h"
 
+void resetGame() {
+  playerScore = 0;
+  enemyScore = 0;
+}
+
 void resetCardNumbers() {
   player.cardNumber = random(1, 10);
   enemy.cardNumber = random(1, 10);
@@ -33,13 +38,6 @@ void resetTimers() {
   enemySwungHammer = false;
   playerDodgedHammer = false;
   enemyDodgedHammer= false;
-}
-
-void resetGame() {
-  playerScore = 0;
-  enemyScore = 0;
-  resetCardNumbers();
-  resetTimers();
 }
 
 int countDown() {
@@ -185,7 +183,7 @@ void mainAction() {
   // have the enemy make a decision and restart all timers
   if (inGameTimer == 0) {
     inGame = false;
-    delay(3000);
+    delay(2000);
     resetTimers();
     countDown();
     didPressButton = false;
@@ -206,6 +204,9 @@ void introduction() {
   } else {
     arduboy.print(F("off"));
   }
+
+  arduboy.setCursor(18, 54);
+  arduboy.print(F("@raspberrybrain"));
   
   if (arduboy.justPressed(A_BUTTON)) {
     gameStatus = GameStatus::PlayGame;
