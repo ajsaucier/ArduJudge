@@ -3,11 +3,6 @@
 
 #include "globals.h"
 
-void resetGame() {
-  playerScore = 0;
-  enemyScore = 0;
-}
-
 void resetCardNumbers() {
   player.cardNumber = random(1, 10);
   enemy.cardNumber = random(1, 10);
@@ -38,6 +33,13 @@ void resetTimers() {
   enemySwungHammer = false;
   playerDodgedHammer = false;
   enemyDodgedHammer= false;
+}
+
+void resetGame() {
+  playerScore = 0;
+  enemyScore = 0;
+  resetCardNumbers();
+  resetTimers();
 }
 
 int countDown() {
@@ -118,52 +120,62 @@ void mainAction() {
   if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON))
     sound.tone(NOTE_G5, 50);
     
-  if (player.cardNumber > enemy.cardNumber || player.cardNumber == enemy.cardNumber) {
+  if (player.cardNumber > enemy.cardNumber) {
     --inGameTimer;
     // Enemy AI
     if (!didPressButton) {
       if (inGameTimer == 2) {
-        if (random(0, 3) == 1) {
-          enemySwungHammer = true;
-          playerScore += 2;
-        } else {
-          enemyDodgedHammer = true;
-          enemyScore += 2;
-        }
+        enemyDodgedHammer = true;
+        enemyScore += 2;
         sound.tone(NOTE_G5, 50);
       }
     }
     // Player control
-    if (arduboy.justPressed(A_BUTTON)) {
+    if (arduboy.justPressed(A_BUTTON) && !enemyDodgedHammer) {
       playerSwungHammer = true;
       playerScore += 3;
       didPressButton = true;
-    } else if (arduboy.justPressed(B_BUTTON)) {
+    } else if (arduboy.justPressed(B_BUTTON) && !enemyDodgedHammer) {
       playerDodgedHammer = true;
       enemyScore += 2;
       didPressButton = true;
     }
-  } else {
+  } else if (player.cardNumber == enemy.cardNumber) {
     --inGameTimer;
     // Enemy AI
     if (!didPressButton) {
       if (inGameTimer == 2) {
-        if (random(0, 3) == 1) {
-          enemyDodgedHammer = true;
-          playerScore += 3;
-        } else {
-          enemySwungHammer = true;
-          enemyScore += 3;
-        }
+        enemySwungHammer = true;
+        enemyScore += 3;
         sound.tone(NOTE_G5, 50);
       }
     }
     // Player control
-    if (arduboy.justPressed(A_BUTTON)) {
+    if (arduboy.justPressed(A_BUTTON) && !enemySwungHammer) {
+      playerSwungHammer = true;
+      playerScore += 3;
+      didPressButton = true;
+    } else if (arduboy.justPressed(B_BUTTON) && !enemySwungHammer) {
+      playerDodgedHammer = true;
+      enemyScore += 2;
+      didPressButton = true;
+    }
+  } else if (player.cardNumber < enemy.cardNumber) {
+    --inGameTimer;
+    // Enemy AI
+    if (!didPressButton) {
+      if (inGameTimer == 2) {
+        enemySwungHammer = true;
+        enemyScore += 3;
+        sound.tone(NOTE_G5, 50);
+      }
+    }
+    // Player control
+    if (arduboy.justPressed(A_BUTTON) && !enemySwungHammer) {
       playerSwungHammer = true;
       enemyScore += 3;
       didPressButton = true;
-    } else if (arduboy.justPressed(B_BUTTON)) {
+    } else if (arduboy.justPressed(B_BUTTON) && !enemySwungHammer) {
       playerDodgedHammer = true;
       playerScore += 2;
       didPressButton = true;
