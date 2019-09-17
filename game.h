@@ -4,8 +4,8 @@
 #include "globals.h"
 
 void resetGame() {
-  playerScore = 0;
-  enemyScore = 0;
+  player.score = 0;
+  enemy.score = 0;
 }
 
 void resetCardNumbers() {
@@ -19,14 +19,14 @@ void showPlayerScore() {
   arduboy.setCursor(0, 0);
   arduboy.fillRect(0, 0, 16, 16, BLACK);
   arduboy.setTextSize(1);
-  arduboy.print(playerScore);
+  arduboy.print(player.score);
 }
 
 void showEnemyScore() {
   arduboy.setCursor(WIDTH - 16, 0);
   arduboy.fillRect(WIDTH - 16, 0, 16, 16, BLACK);
   arduboy.setTextSize(1);
-  arduboy.print(enemyScore);
+  arduboy.print(enemy.score);
 }
 
 void resetTimers() {
@@ -34,10 +34,10 @@ void resetTimers() {
   mainTimerSeconds = 3;
   mainCountdownNumber = 1000;
   inGameTimer = 25;
-  playerSwungHammer = false;
-  enemySwungHammer = false;
-  playerDodgedHammer = false;
-  enemyDodgedHammer= false;
+  player.didSwingHammer = false;
+  enemy.didSwingHammer = false;
+  player.didDodgeHammer = false;
+  enemy.didDodgeHammer= false;
 }
 
 int countDown() {
@@ -68,13 +68,13 @@ void drawPlayer() {
   if (player.isHoldingCard) {
     Sprites::drawOverwrite(player.x, player.y, characterHold, 0);
   }
-  if (playerSwungHammer) {
+  if (player.didSwingHammer) {
     Sprites::drawOverwrite(player.x, player.y, characterSwing, 0);
   }
-  if (enemySwungHammer) {
+  if (enemy.didSwingHammer) {
     Sprites::drawOverwrite(player.x, player.y, characterHit, 0);
   }
-  if (playerDodgedHammer) {
+  if (player.didDodgeHammer) {
     Sprites::drawOverwrite(player.x, player.y, characterDodge, 0);
     player.isHoldingCard = false;
   }
@@ -85,25 +85,25 @@ void drawEnemy() {
   if (enemy.isHoldingCard) {
     Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedHold, 0);
   }
-  if (enemySwungHammer) {
+  if (enemy.didSwingHammer) {
     Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedSwing, 0);
   }
-  if (playerSwungHammer) {
+  if (player.didSwingHammer) {
     Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedHit, 0);
   }
-  if (enemyDodgedHammer) {
+  if (enemy.didDodgeHammer) {
     Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedDodge, 0);
     enemy.isHoldingCard = false;
   }
 }
 
 void drawCards() {
-  if (!playerDodgedHammer) {
+  if (!player.didDodgeHammer) {
     player.showCard();
   } else {
     player.hideCard();
   }
-  if (!enemyDodgedHammer) {
+  if (!enemy.didDodgeHammer) {
     enemy.showCard();
   } else {
     enemy.hideCard();
@@ -123,19 +123,19 @@ void mainAction() {
     // Enemy AI
     if (!didPressButton) {
       if (inGameTimer == 2) {
-        enemyDodgedHammer = true;
-        enemyScore += 2;
+        enemy.didDodgeHammer = true;
+        enemy.score += 2;
         sound.tone(NOTE_G5, 50);
       }
     }
     // Player control
-    if (arduboy.justPressed(A_BUTTON) && !enemyDodgedHammer) {
-      playerSwungHammer = true;
-      playerScore += 3;
+    if (arduboy.justPressed(A_BUTTON) && !enemy.didDodgeHammer) {
+      player.didSwingHammer = true;
+      player.score += 3;
       didPressButton = true;
-    } else if (arduboy.justPressed(B_BUTTON) && !enemyDodgedHammer) {
-      playerDodgedHammer = true;
-      enemyScore += 2;
+    } else if (arduboy.justPressed(B_BUTTON) && !enemy.didDodgeHammer) {
+      player.didDodgeHammer = true;
+      enemy.score += 2;
       didPressButton = true;
     }
   } else if (player.cardNumber == enemy.cardNumber) {
@@ -143,19 +143,19 @@ void mainAction() {
     // Enemy AI
     if (!didPressButton) {
       if (inGameTimer == 2) {
-        enemySwungHammer = true;
-        enemyScore += 3;
+        enemy.didSwingHammer = true;
+        enemy.score += 3;
         sound.tone(NOTE_G5, 50);
       }
     }
     // Player control
-    if (arduboy.justPressed(A_BUTTON) && !enemySwungHammer) {
-      playerSwungHammer = true;
-      playerScore += 3;
+    if (arduboy.justPressed(A_BUTTON) && !enemy.didSwingHammer) {
+      player.didSwingHammer = true;
+      player.score += 3;
       didPressButton = true;
-    } else if (arduboy.justPressed(B_BUTTON) && !enemySwungHammer) {
-      playerDodgedHammer = true;
-      enemyScore += 2;
+    } else if (arduboy.justPressed(B_BUTTON) && !enemy.didSwingHammer) {
+      player.didDodgeHammer = true;
+      enemy.score += 2;
       didPressButton = true;
     }
   } else if (player.cardNumber < enemy.cardNumber) {
@@ -163,19 +163,19 @@ void mainAction() {
     // Enemy AI
     if (!didPressButton) {
       if (inGameTimer == 2) {
-        enemySwungHammer = true;
-        enemyScore += 3;
+        enemy.didSwingHammer = true;
+        enemy.score += 3;
         sound.tone(NOTE_G5, 50);
       }
     }
     // Player control
-    if (arduboy.justPressed(A_BUTTON) && !enemySwungHammer) {
-      playerSwungHammer = true;
-      enemyScore += 3;
+    if (arduboy.justPressed(A_BUTTON) && !enemy.didSwingHammer) {
+      player.didSwingHammer = true;
+      enemy.score += 3;
       didPressButton = true;
-    } else if (arduboy.justPressed(B_BUTTON) && !enemySwungHammer) {
-      playerDodgedHammer = true;
-      playerScore += 2;
+    } else if (arduboy.justPressed(B_BUTTON) && !enemy.didSwingHammer) {
+      player.didDodgeHammer = true;
+      player.score += 2;
       didPressButton = true;
     }
   }
@@ -231,7 +231,7 @@ void playGame() {
     drawCards();
     mainAction();
   }
-  if (playerScore >= 99 || enemyScore >= 99) {
+  if (player.score >= scoreToWin || enemy.score >= scoreToWin) {
     gameStatus = GameStatus::GameOver;
   }
 }
@@ -241,12 +241,12 @@ void gameOver() {
   arduboy.setTextSize(2);
   arduboy.print(F("Game Over"));
   arduboy.setTextSize(1);
-  if (playerScore >= 99) {
+  if (player.score >= scoreToWin) {
     arduboy.setCursor(32, 32);
     arduboy.print(F("You Won!"));
     arduboy.setCursor(32, 42);
     arduboy.print(F("(A) Start Over"));
-  } else if (enemyScore >= 99){
+  } else if (enemy.score >= scoreToWin){
     arduboy.setCursor(32, 32);
     arduboy.print(F("You lost!"));
     arduboy.setCursor(32, 42);
