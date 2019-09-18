@@ -38,6 +38,7 @@ void resetTimers() {
   enemy.didSwingHammer = false;
   player.didDodgeHammer = false;
   enemy.didDodgeHammer= false;
+  afterRoundTimer = 75;
 }
 
 int countDown() {
@@ -118,11 +119,11 @@ void mainAction() {
   if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON))
     sound.tone(NOTE_G5, 50);
     
-  if (player.cardNumber > enemy.cardNumber) {
+  if (player.cardNumber > enemy.cardNumber && inGameTimer) {
     --inGameTimer;
     // Enemy AI
     if (!didPressButton) {
-      if (inGameTimer == 2) {
+      if (inGameTimer == 0) {
         enemy.didDodgeHammer = true;
         enemy.score += 2;
         sound.tone(NOTE_G5, 50);
@@ -138,11 +139,11 @@ void mainAction() {
       enemy.score += 2;
       didPressButton = true;
     }
-  } else if (player.cardNumber == enemy.cardNumber) {
+  } else if (player.cardNumber == enemy.cardNumber && inGameTimer) {
     --inGameTimer;
     // Enemy AI
     if (!didPressButton) {
-      if (inGameTimer == 2) {
+      if (inGameTimer == 0) {
         enemy.didSwingHammer = true;
         enemy.score += 3;
         sound.tone(NOTE_G5, 50);
@@ -158,11 +159,11 @@ void mainAction() {
       enemy.score += 2;
       didPressButton = true;
     }
-  } else if (player.cardNumber < enemy.cardNumber) {
+  } else if (player.cardNumber < enemy.cardNumber && inGameTimer) {
     --inGameTimer;
     // Enemy AI
     if (!didPressButton) {
-      if (inGameTimer == 2) {
+      if (inGameTimer == 0) {
         enemy.didSwingHammer = true;
         enemy.score += 3;
         sound.tone(NOTE_G5, 50);
@@ -179,14 +180,18 @@ void mainAction() {
       didPressButton = true;
     }
   }
+  
   // If the time is up and player hasn't hit either button
   // have the enemy make a decision and restart all timers
-  if (inGameTimer == 0) {
+  if (!inGameTimer) {
     inGame = false;
-    delay(2000);
+    --afterRoundTimer;
+    didPressButton = false;
+  }
+  
+  if (!afterRoundTimer) {
     resetTimers();
     countDown();
-    didPressButton = false;
   }
 }
 
@@ -213,7 +218,8 @@ void introduction() {
   }
   
   if (arduboy.justPressed(B_BUTTON)) {
-    toggleSoundSettings();
+    arduboy.audio.toggle();
+    arduboy.audio.saveOnOff();
   }
 }
 

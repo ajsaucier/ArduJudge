@@ -36,21 +36,13 @@ uint8_t mainTimerSeconds{ 3 };
 // Increase to slow down time between 3...2...1
 uint8_t timeBetweenCounts{ 40 };
 
+// Amount of time to pause between rounds
+uint8_t afterRoundTimer{ 75 };
+
 // uint8_t randomMod{ random(30, 51) };
 
 // Check for a pressed button and keep count
 bool didPressButton{ false };
-
-// Add ability to turn on or off beep sounds
-void toggleSoundSettings() {
-  
-  if (arduboy.audio.enabled()) {
-    arduboy.audio.off();
-  } else {
-    arduboy.audio.on();
-  }
-  arduboy.audio.saveOnOff();
-}
 
 enum class GameStatus : uint8_t {
   Reset,
