@@ -115,83 +115,69 @@ void drawCards() {
   enemy.isHoldingCard = true;
 }
 
-void mainAction() {
-  if (arduboy.justPressed(A_BUTTON) || arduboy.justPressed(B_BUTTON))
-    sound.tone(NOTE_G5, 50);
-    
-  if (player.cardNumber > enemy.cardNumber && inGameTimer) {
-    --inGameTimer;
-    // Enemy AI
-    if (!didPressButton) {
-      if (inGameTimer == 0) {
-        enemy.didDodgeHammer = true;
+// Updated function credit goes to @Pharap
+
+void processMainAction()
+{
+  if (inGameTimer > 0)
+  {
+    // Player control
+    if (arduboy.justPressed(A_BUTTON))
+    {
+      player.didSwingHammer = true;
+      
+      if (player.cardNumber >= enemy.cardNumber)
+        player.score += 3;
+      else
+        enemy.score += 3;
+        
+      sound.tone(NOTE_G5, 50);
+      gameState = GameState::AfterRound;
+    }
+    else if (arduboy.justPressed(B_BUTTON))
+    {
+      player.didDodgeHammer = true;
+      
+      if (player.cardNumber <= enemy.cardNumber)
+        player.score += 2;
+      else
         enemy.score += 2;
-        sound.tone(NOTE_G5, 50);
-      }
+        
+      sound.tone(NOTE_G5, 50);
+      gameState = GameState::AfterRound;
     }
-    // Player control
-    if (arduboy.justPressed(A_BUTTON) && !enemy.didDodgeHammer) {
-      player.didSwingHammer = true;
-      player.score += 3;
-      didPressButton = true;
-    } else if (arduboy.justPressed(B_BUTTON) && !enemy.didDodgeHammer) {
-      player.didDodgeHammer = true;
-      enemy.score += 2;
-      didPressButton = true;
-    }
-  } else if (player.cardNumber == enemy.cardNumber && inGameTimer) {
-    --inGameTimer;
+  }
+  // If the time is up and player hasn't hit either button have the enemy make a decision
+  else
+  {
     // Enemy AI
-    if (!didPressButton) {
-      if (inGameTimer == 0) {
-        enemy.didSwingHammer = true;
-        enemy.score += 3;
-        sound.tone(NOTE_G5, 50);
-      }
-    }
-    // Player control
-    if (arduboy.justPressed(A_BUTTON) && !enemy.didSwingHammer) {
-      player.didSwingHammer = true;
-      player.score += 3;
-      didPressButton = true;
-    } else if (arduboy.justPressed(B_BUTTON) && !enemy.didSwingHammer) {
-      player.didDodgeHammer = true;
+    if (player.cardNumber > enemy.cardNumber)
+    {
+      enemy.didDodgeHammer = true;
       enemy.score += 2;
-      didPressButton = true;
     }
-  } else if (player.cardNumber < enemy.cardNumber && inGameTimer) {
-    --inGameTimer;
-    // Enemy AI
-    if (!didPressButton) {
-      if (inGameTimer == 0) {
-        enemy.didSwingHammer = true;
-        enemy.score += 3;
-        sound.tone(NOTE_G5, 50);
-      }
-    }
-    // Player control
-    if (arduboy.justPressed(A_BUTTON) && !enemy.didSwingHammer) {
-      player.didSwingHammer = true;
+    else
+    {
+      enemy.didSwingHammer = true;
       enemy.score += 3;
-      didPressButton = true;
-    } else if (arduboy.justPressed(B_BUTTON) && !enemy.didSwingHammer) {
-      player.didDodgeHammer = true;
-      player.score += 2;
-      didPressButton = true;
     }
+    
+    sound.tone(NOTE_G5, 50);
+    gameState = GameState::AfterRound;
   }
-  
-  // If the time is up and player hasn't hit either button
-  // have the enemy make a decision and restart all timers
-  if (!inGameTimer) {
-    inGame = false;
-    --afterRoundTimer;
-    didPressButton = false;
+}
+
+void mainAction()
+{
+  processMainAction();
+
+  if (inGameTimer > 0)
+  {
+    --inGameTimer;
   }
-  
-  if (!afterRoundTimer) {
-    resetTimers();
-    countDown();
+  else
+  {
+    gameState = GameState::AfterRound;
   }
 }
 
@@ -214,7 +200,7 @@ void introduction() {
   arduboy.print(F("@raspberrybrain"));
   
   if (arduboy.justPressed(A_BUTTON)) {
-    gameStatus = GameStatus::PlayGame;
+    gameState = GameState::PlayGame;
   }
   
   if (arduboy.justPressed(B_BUTTON)) {
@@ -233,12 +219,30 @@ void playGame() {
   if (mainTimerSeconds == 0) {
     inGame = true;
   }
-  if (inGame) {
+  if (inGame > 0) {
     drawCards();
     mainAction();
   }
   if (player.score >= scoreToWin || enemy.score >= scoreToWin) {
-    gameStatus = GameStatus::GameOver;
+    gameState = GameState::GameOver;
+  }
+}
+
+
+void afterRoundState()
+{
+  showPlayerScore();
+  showEnemyScore();
+  drawPlayer();
+  drawEnemy();
+  drawCards();
+  --afterRoundTimer;
+  if (afterRoundTimer == 0)
+  {
+    inGame = false;
+    resetTimers();
+    countDown();
+    gameState = GameState::PlayGame;
   }
 }
 
@@ -260,7 +264,7 @@ void gameOver() {
   }
   
   if (arduboy.justPressed(A_BUTTON)) {
-    gameStatus = GameStatus::Reset;
+    gameState = GameState::Reset;
   }
   
 }

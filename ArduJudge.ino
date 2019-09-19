@@ -22,21 +22,26 @@ void loop() {
 
   arduboy.pollButtons();
 
-  switch (gameStatus) {
+  switch (gameState) {
 
-    case GameStatus::Reset:
+    case GameState::Reset:
       resetGame();
-      gameStatus = GameStatus::Introduction;
+      resetCardNumbers();
+      gameState = GameState::Introduction;
     
-    case GameStatus::Introduction:
+    case GameState::Introduction:
       introduction();
       break;
 
-    case GameStatus::PlayGame:
+    case GameState::PlayGame:
       playGame();
       break;
+      
+    case GameState::AfterRound:
+      afterRoundState();
+      break;
 
-    case GameStatus::GameOver:
+    case GameState::GameOver:
       gameOver();
       break;
       
