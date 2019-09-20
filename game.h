@@ -64,38 +64,24 @@ void showCountdown() {
   Sprites::drawPlusMask((WIDTH / 2) - 4, 8, counterArrows_plus_mask, countDown());
 }
 
-void drawPlayer() {
-  Sprites::drawOverwrite(player.x, player.y, player.image, 0);
-  if (player.isHoldingCard) {
-    Sprites::drawOverwrite(player.x, player.y, characterHold, 0);
-  }
-  if (player.didSwingHammer) {
-    Sprites::drawOverwrite(player.x, player.y, characterSwing, 0);
-  }
-  if (enemy.didSwingHammer) {
-    Sprites::drawOverwrite(player.x, player.y, characterHit, 0);
-  }
-  if (player.didDodgeHammer) {
-    Sprites::drawOverwrite(player.x, player.y, characterDodge, 0);
-    player.isHoldingCard = false;
-  }
-}
+void drawEntity(Entity entity)
+{
+  Sprites::drawOverwrite(entity.x, entity.y, entity.images.defaultImage, 0);
 
-void drawEnemy() {
-  Sprites::drawOverwrite(enemy.x, enemy.y, enemy.image, 0);
-  if (enemy.isHoldingCard) {
-    Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedHold, 0);
-  }
-  if (enemy.didSwingHammer) {
-    Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedSwing, 0);
-  }
-  if (player.didSwingHammer) {
-    Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedHit, 0);
-  }
-  if (enemy.didDodgeHammer) {
-    Sprites::drawOverwrite(enemy.x, enemy.y, characterFlippedDodge, 0);
-    enemy.isHoldingCard = false;
-  }
+  if (entity.isHoldingCard)
+    Sprites::drawOverwrite(entity.x, entity.y, entity.images.holdImage, 0);
+
+  if (entity.didSwingHammer)
+    Sprites::drawOverwrite(entity.x, entity.y, entity.images.swingImage, 0);
+    
+  if (player.didSwingHammer)
+    Sprites::drawOverwrite(enemy.x, enemy.y, enemy.images.hitImage, 0);
+
+  if (enemy.didSwingHammer)
+    Sprites::drawOverwrite(player.x, player.y, player.images.hitImage, 0);
+
+  if (entity.didDodgeHammer)
+    Sprites::drawOverwrite(entity.x, entity.y, entity.images.dodgeImage, 0);
 }
 
 void drawCards() {
@@ -214,8 +200,8 @@ void playGame() {
   showEnemyScore();
   countDown();
   showCountdown();
-  drawPlayer();
-  drawEnemy();
+  drawEntity(player);
+  drawEntity(enemy);
   if (mainTimerSeconds == 0) {
     inGame = true;
   }
@@ -233,8 +219,8 @@ void afterRoundState()
 {
   showPlayerScore();
   showEnemyScore();
-  drawPlayer();
-  drawEnemy();
+  drawEntity(player);
+  drawEntity(enemy);
   drawCards();
   --afterRoundTimer;
   if (afterRoundTimer == 0)

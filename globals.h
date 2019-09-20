@@ -10,7 +10,7 @@ ArduboyTones sound(arduboy.audio.enabled);
 // Successful hit = 3
 // Successful dodge = 2
 // If you mess up, opposite player gets the points
-uint8_t scoreToWin { 99 };
+const uint8_t scoreToWin { 99 };
 
 uint8_t playerNumber { 0 }; // 1 through 9
 uint8_t enemyNumber { 0 };
@@ -55,7 +55,17 @@ enum class GameState : uint8_t {
 GameState gameState {GameState::Reset}; // for production
 // GameState GameState {GameState::PlayGame}; // for testing
 
-struct Entity {
+struct EntityImages
+{
+  const uint8_t *defaultImage;
+  const uint8_t *holdImage;
+  const uint8_t *swingImage;
+  const uint8_t *hitImage;
+  const uint8_t *dodgeImage;
+};
+
+struct Entity 
+{
   uint8_t x;
   uint8_t y;
   uint8_t score; // max 99
@@ -63,7 +73,7 @@ struct Entity {
   bool isHoldingCard;
   bool didSwingHammer;
   bool didDodgeHammer;
-  const uint8_t *image;
+  EntityImages images;
   
   void showCard() {
     Sprites::drawOverwrite(x + (getImageWidth(characterHold) / 2) - (getImageWidth(numberCard) / 2), y - 32, numberCard, 0);
@@ -89,7 +99,13 @@ Entity player {
   false,
   false,
   false,
-  character
+  {
+    character,
+    characterHold,
+    characterSwing,
+    characterHit,
+    characterDodge
+  }
 };
 
 Entity enemy {
@@ -100,7 +116,13 @@ Entity enemy {
   false,
   false,
   false,
-  characterFlipped
+    {
+    characterFlipped,
+    characterFlippedHold,
+    characterFlippedSwing,
+    characterFlippedHit,
+    characterFlippedDodge
+  }
 };
 
 #endif
