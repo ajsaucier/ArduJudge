@@ -3,28 +3,32 @@
 
 #include "globals.h"
 
-void resetCardNumbers() {
+void resetCardNumbers() 
+{
   player.cardNumber = random(1, 10);
   enemy.cardNumber = random(1, 10);
   player.isHoldingCard = false;
   enemy.isHoldingCard = false;
 }
 
-void showPlayerScore() {
+void showPlayerScore() 
+{
   arduboy.setCursor(0, 0);
   arduboy.fillRect(0, 0, 16, 16, BLACK);
   arduboy.setTextSize(1);
   arduboy.print(player.score);
 }
 
-void showEnemyScore() {
+void showEnemyScore() 
+{
   arduboy.setCursor(WIDTH - 16, 0);
   arduboy.fillRect(WIDTH - 16, 0, 16, 16, BLACK);
   arduboy.setTextSize(1);
   arduboy.print(enemy.score);
 }
 
-void resetTimers() {
+void resetTimers() 
+{
   resetCardNumbers();
   mainTimerSeconds = 3;
   mainCountdownNumber = 1000;
@@ -37,14 +41,17 @@ void resetTimers() {
 }
 
 int countDown() {
-  if (mainCountdownNumber > 0) {
-    if (mainCountdownNumber == 1000) {
+  if (mainCountdownNumber > 0) 
+  {
+    if (mainCountdownNumber == 1000) 
+    {
       sound.tone(NOTE_E5, 50);
     }
     --mainCountdownNumber;
   }
   
-  if (mainCountdownNumber % timeBetweenCounts == 0 && mainTimerSeconds > 0) {
+  if (mainCountdownNumber % timeBetweenCounts == 0 && mainTimerSeconds > 0) 
+  {
     --mainTimerSeconds;
     sound.tone(NOTE_E5, 50);
     if (mainTimerSeconds == 0)
@@ -54,7 +61,8 @@ int countDown() {
   return mainTimerSeconds;
 }
 
-void showCountdown() {
+void showCountdown() 
+{
   arduboy.setCursor((WIDTH / 2) - 4, 8);
   Sprites::drawPlusMask((WIDTH / 2) - 4, 8, counterArrows_plus_mask, countDown());
 }

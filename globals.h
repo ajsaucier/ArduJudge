@@ -75,15 +75,18 @@ struct Entity
   bool didDodgeHammer;
   EntityImages images;
   
-  void showCard() {
+  void showCard() 
+  {
     Sprites::drawOverwrite(x + (getImageWidth(characterHold) / 2) - (getImageWidth(numberCard) / 2), y - 32, numberCard, 0);
   }
   
-  void hideCard() {
+  void hideCard() 
+  {
     Sprites::drawErase(x + (getImageWidth(characterHold) / 2) - (getImageWidth(numberCard) / 2), y - 32, numberCard, 0);
   }
   
-  void showCardNumber() {
+  void showCardNumber() 
+  {
     arduboy.setCursor(x + (getImageWidth(numberCard)), y - (getImageHeight(numberCard) / 2) - (8));
     arduboy.setTextSize(2);
     arduboy.print(cardNumber);
