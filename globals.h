@@ -83,11 +83,10 @@ struct Entity
     Sprites::drawErase(x + (getImageWidth(characterHold) / 2) - (getImageWidth(numberCard) / 2), y - 32, numberCard, 0);
   }
   
-  int showCardNumber() {
+  void showCardNumber() {
     arduboy.setCursor(x + (getImageWidth(numberCard)), y - (getImageHeight(numberCard) / 2) - (8));
     arduboy.setTextSize(2);
     arduboy.print(cardNumber);
-    return cardNumber;
   }
 };
 
