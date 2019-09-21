@@ -25,26 +25,27 @@ void loop() {
   switch (gameState) {
 
     case GameState::Reset:
-      resetGame();
-      resetCardNumbers();
+      resetGameState.update();
       gameState = GameState::Introduction;
     
     case GameState::Introduction:
-      introduction();
+      introductionState.update();
+      introductionState.draw();
       break;
 
     case GameState::PlayGame:
-      playGame();
+      playGameState.update();
+      playGameState.draw();
       break;
       
     case GameState::AfterRound:
-      afterRoundState();
+      afterRoundState.update();
       break;
 
     case GameState::GameOver:
-      gameOver();
+      gameOverState.update();
+      gameOverState.draw();
       break;
-      
   }
 
   arduboy.display();

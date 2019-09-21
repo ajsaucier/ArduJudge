@@ -3,11 +3,6 @@
 
 #include "globals.h"
 
-void resetGame() {
-  player.score = 0;
-  enemy.score = 0;
-}
-
 void resetCardNumbers() {
   player.cardNumber = random(1, 10);
   enemy.cardNumber = random(1, 10);
@@ -124,7 +119,7 @@ void processMainAction()
     {
       player.didDodgeHammer = true;
       
-      if (player.cardNumber <= enemy.cardNumber)
+      if (player.cardNumber < enemy.cardNumber)
         player.score += 2;
       else
         enemy.score += 2;
@@ -167,92 +162,153 @@ void mainAction()
   }
 }
 
-void introduction() {
-  arduboy.setCursor(8, 8);
-  arduboy.setTextSize(2);
-  arduboy.print(F("ArduJudge"));
-  arduboy.setTextSize(1);
-  arduboy.setCursor(32, 32);
-  arduboy.print(F("(A) Start"));
-  arduboy.setCursor(32, 42);
-  arduboy.print(F("(B) Sound "));
-  if (arduboy.audio.enabled()) {
-    arduboy.print(F("on"));
-  } else {
-    arduboy.print(F("off"));
-  }
-
-  arduboy.setCursor(18, 54);
-  arduboy.print(F("@raspberrybrain"));
-  
-  if (arduboy.justPressed(A_BUTTON)) {
-    gameState = GameState::PlayGame;
-  }
-  
-  if (arduboy.justPressed(B_BUTTON)) {
-    arduboy.audio.toggle();
-    arduboy.audio.saveOnOff();
-  }
-}
-
-void playGame() {
-  showPlayerScore();
-  showEnemyScore();
-  countDown();
-  showCountdown();
-  drawEntity(player);
-  drawEntity(enemy);
-  if (mainTimerSeconds == 0) {
-    inGame = true;
-  }
-  if (inGame > 0) {
-    drawCards();
-    mainAction();
-  }
-  if (player.score >= scoreToWin || enemy.score >= scoreToWin) {
-    gameState = GameState::GameOver;
-  }
-}
-
-
-void afterRoundState()
+class ResetGameState
 {
-  showPlayerScore();
-  showEnemyScore();
-  drawEntity(player);
-  drawEntity(enemy);
-  drawCards();
-  --afterRoundTimer;
-  if (afterRoundTimer == 0)
+public: 
+  void update()
   {
-    inGame = false;
-    resetTimers();
-    countDown();
-    gameState = GameState::PlayGame;
+    player.score = 0;
+    enemy.score = 0;
+    resetCardNumbers();
   }
-}
+};
 
-void gameOver() {
-  arduboy.setCursor(8, 8);
-  arduboy.setTextSize(2);
-  arduboy.print(F("Game Over"));
-  arduboy.setTextSize(1);
-  if (player.score >= scoreToWin) {
+ResetGameState resetGameState;
+
+class IntroductionState
+{
+public:
+  void update()
+  {
+    if (arduboy.justPressed(A_BUTTON))
+    {
+      gameState = GameState::PlayGame;
+    }
+
+    if (arduboy.justPressed(B_BUTTON))
+    {
+      arduboy.audio.toggle();
+      arduboy.audio.saveOnOff();
+    }
+  }
+  
+  void draw()
+  {
+    arduboy.setCursor(8, 8);
+    arduboy.setTextSize(2);
+    arduboy.print(F("ArduJudge"));
+
     arduboy.setCursor(32, 32);
-    arduboy.print(F("You Won!"));
+    arduboy.setTextSize(1);
+    arduboy.print(F("(A) Start"));
+
     arduboy.setCursor(32, 42);
-    arduboy.print(F("(A) Start Over"));
-  } else if (enemy.score >= scoreToWin){
-    arduboy.setCursor(32, 32);
-    arduboy.print(F("You lost!"));
+    arduboy.print(F("(B) Sound "));
+    
+    if (arduboy.audio.enabled())
+    {
+      arduboy.print(F("on"));
+    }
+    else
+    {
+      arduboy.print(F("off"));
+    }
+
+    arduboy.setCursor(18, 54);
+    arduboy.print(F("@raspberrybrain"));
+  }
+};
+
+IntroductionState introductionState;
+
+class PlayGameState
+{
+public:
+  void update() 
+  {
+    countDown();
+    
+    if (mainTimerSeconds == 0) {
+      inGame = true;
+    }
+    if (inGame > 0) {
+      drawCards();
+      mainAction();
+    }
+    if (player.score >= scoreToWin || enemy.score >= scoreToWin) {
+      gameState = GameState::GameOver;
+    }
+  }
+  
+  void draw()
+  {
+    showPlayerScore();
+    showEnemyScore();
+    showCountdown();
+    drawEntity(player);
+    drawEntity(enemy);
+  }
+};
+
+PlayGameState playGameState;
+
+class AfterRoundState
+{
+public:
+  void update() 
+  {
+    showPlayerScore();
+    showEnemyScore();
+    drawEntity(player);
+    drawEntity(enemy);
+    drawCards();
+    --afterRoundTimer;
+    if (afterRoundTimer == 0)
+    {
+      inGame = false;
+      resetTimers();
+      countDown();
+      gameState = GameState::PlayGame;
+    }
+  }
+};
+
+AfterRoundState afterRoundState;
+
+class GameOverState
+{
+public:
+  void update()
+  {
+    if (arduboy.justPressed(A_BUTTON))
+    {
+      gameState = GameState::Reset;
+    }
+  }
+  
+  void draw()
+  {
+    arduboy.setCursor(8, 8);
+    arduboy.setTextSize(2);
+    arduboy.print(F("Game Over"));
+    
+    arduboy.setTextSize(1);
+    if (player.score >= scoreToWin)
+    {
+      arduboy.setCursor(32, 32);
+      arduboy.print(F("You Won!"));
+    }
+    else
+    {
+      arduboy.setCursor(32, 32);
+      arduboy.print(F("You lost!"));
+    }
+    
     arduboy.setCursor(32, 42);
     arduboy.print(F("(A) Start Over"));
   }
-  
-  if (arduboy.justPressed(A_BUTTON)) {
-    gameState = GameState::Reset;
-  }
-  
-}
+};
+
+GameOverState gameOverState;
 
 #endif

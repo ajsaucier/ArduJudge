@@ -91,7 +91,8 @@ struct Entity
   }
 };
 
-Entity player {
+Entity player 
+{
   8,
   32,
   0,
@@ -108,7 +109,8 @@ Entity player {
   }
 };
 
-Entity enemy {
+Entity enemy 
+{
   static_cast<uint8_t>((WIDTH - getImageWidth(characterHold)) - 8),
   32,
   0,
@@ -116,7 +118,7 @@ Entity enemy {
   false,
   false,
   false,
-    {
+  {
     characterFlipped,
     characterFlippedHold,
     characterFlippedSwing,
