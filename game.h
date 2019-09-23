@@ -27,46 +27,6 @@ void showEnemyScore()
   arduboy.print(enemy.score);
 }
 
-void resetTimers() 
-{
-  resetCardNumbers();
-  mainTimerSeconds = 3;
-  mainCountdownNumber = 1000;
-  inGameTimer = 25;
-  player.didSwingHammer = false;
-  enemy.didSwingHammer = false;
-  player.didDodgeHammer = false;
-  enemy.didDodgeHammer= false;
-  afterRoundTimer = 75;
-}
-
-int countDown() {
-  if (mainCountdownNumber > 0) 
-  {
-    if (mainCountdownNumber == 1000) 
-    {
-      sound.tone(NOTE_E5, 50);
-    }
-    --mainCountdownNumber;
-  }
-  
-  if (mainCountdownNumber % timeBetweenCounts == 0 && mainTimerSeconds > 0) 
-  {
-    --mainTimerSeconds;
-    sound.tone(NOTE_E5, 50);
-    if (mainTimerSeconds == 0)
-      sound.tone(NOTE_G5, 50);
-  }
-  
-  return mainTimerSeconds;
-}
-
-void showCountdown() 
-{
-  arduboy.setCursor((WIDTH / 2) - 4, 8);
-  Sprites::drawPlusMask((WIDTH / 2) - 4, 8, counterArrows_plus_mask, countDown());
-}
-
 void drawEntity(Entity entity)
 {
   Sprites::drawOverwrite(entity.x, entity.y, entity.images.defaultImage, 0);
@@ -77,11 +37,8 @@ void drawEntity(Entity entity)
   if (entity.didSwingHammer)
     Sprites::drawOverwrite(entity.x, entity.y, entity.images.swingImage, 0);
     
-  if (player.didSwingHammer)
-    Sprites::drawOverwrite(enemy.x, enemy.y, enemy.images.hitImage, 0);
-
-  if (enemy.didSwingHammer)
-    Sprites::drawOverwrite(player.x, player.y, player.images.hitImage, 0);
+  if (entity.wasHit)
+    Sprites::drawOverwrite(entity.x, entity.y, entity.images.hitImage, 0);
 
   if (entity.didDodgeHammer)
     Sprites::drawOverwrite(entity.x, entity.y, entity.images.dodgeImage, 0);
@@ -102,72 +59,6 @@ void drawCards() {
   enemy.showCardNumber();
   player.isHoldingCard = true;
   enemy.isHoldingCard = true;
-}
-
-// Updated function credit goes to @Pharap
-
-void processMainAction()
-{
-  if (inGameTimer > 0)
-  {
-    // Player control
-    if (arduboy.justPressed(A_BUTTON))
-    {
-      player.didSwingHammer = true;
-      
-      if (player.cardNumber >= enemy.cardNumber)
-        player.score += 3;
-      else
-        enemy.score += 3;
-        
-      sound.tone(NOTE_G5, 50);
-      gameState = GameState::AfterRound;
-    }
-    else if (arduboy.justPressed(B_BUTTON))
-    {
-      player.didDodgeHammer = true;
-      
-      if (player.cardNumber < enemy.cardNumber)
-        player.score += 2;
-      else
-        enemy.score += 2;
-        
-      sound.tone(NOTE_G5, 50);
-      gameState = GameState::AfterRound;
-    }
-  }
-  // If the time is up and player hasn't hit either button have the enemy make a decision
-  else
-  {
-    // Enemy AI
-    if (player.cardNumber > enemy.cardNumber)
-    {
-      enemy.didDodgeHammer = true;
-      enemy.score += 2;
-    }
-    else
-    {
-      enemy.didSwingHammer = true;
-      enemy.score += 3;
-    }
-    
-    sound.tone(NOTE_G5, 50);
-    gameState = GameState::AfterRound;
-  }
-}
-
-void mainAction()
-{
-  processMainAction();
-
-  if (inGameTimer > 0)
-  {
-    --inGameTimer;
-  }
-  else
-  {
-    gameState = GameState::AfterRound;
-  }
 }
 
 class ResetGameState
@@ -231,15 +122,106 @@ IntroductionState introductionState;
 
 class PlayGameState
 {
+    // TODO: move countDown to PlayGameState
+  int countDown() {
+    if (mainCountdownNumber > 0) 
+    {
+      if (mainCountdownNumber == 1000) 
+      {
+        sound.tone(NOTE_E5, 50);
+      }
+      --mainCountdownNumber;
+    }
+    
+    if (mainCountdownNumber % timeBetweenCounts == 0 && mainTimerSeconds > 0) 
+    {
+      --mainTimerSeconds;
+      sound.tone(NOTE_E5, 50);
+      if (mainTimerSeconds == 0)
+        sound.tone(NOTE_G5, 50);
+    }
+    
+    return mainTimerSeconds;
+  }
+  
+  void showCountdown() 
+  {
+    arduboy.setCursor((WIDTH / 2) - 4, 8);
+    Sprites::drawPlusMask((WIDTH / 2) - 4, 8, counterArrows_plus_mask, countDown());
+  }
+  // Updated function credit goes to @Pharap
+  
+  void processMainAction()
+  {
+    if (inGameTimer > 0)
+    {
+      // Player control
+      if (arduboy.justPressed(A_BUTTON))
+      {
+        player.didSwingHammer = true;
+        
+        if (player.cardNumber >= enemy.cardNumber)
+          player.score += 3;
+        else
+          enemy.score += 3;
+          
+        enemy.wasHit = true;
+        sound.tone(NOTE_G5, 50);
+        gameState = GameState::AfterRound;
+      }
+      else if (arduboy.justPressed(B_BUTTON))
+      {
+        player.didDodgeHammer = true;
+        
+        if (player.cardNumber < enemy.cardNumber)
+          player.score += 2;
+        else
+          enemy.score += 2;
+          
+        sound.tone(NOTE_G5, 50);
+        gameState = GameState::AfterRound;
+      }
+    }
+    // If the time is up and player hasn't hit either button have the enemy make a decision
+    else
+    {
+      // Enemy AI
+      if (player.cardNumber > enemy.cardNumber)
+      {
+        enemy.didDodgeHammer = true;
+        enemy.score += 2;
+      }
+      else
+      {
+        enemy.didSwingHammer = true;
+        player.wasHit = true;
+        enemy.score += 3;
+      }
+      
+      sound.tone(NOTE_G5, 50);
+      gameState = GameState::AfterRound;
+    }
+  }
+  
+  void mainAction()
+  {
+    processMainAction();
+  
+    if (inGameTimer > 0)
+    {
+      --inGameTimer;
+    }
+    else
+    {
+      gameState = GameState::AfterRound;
+    }
+  }
+  
 public:
   void update() 
   {
-    countDown();
     
     if (mainTimerSeconds == 0) {
-      inGame = true;
-    }
-    if (inGame > 0) {
       drawCards();
       mainAction();
     }
@@ -262,6 +244,23 @@ PlayGameState playGameState;
 
 class AfterRoundState
 {
+  void resetTimers() 
+  {
+    mainTimerSeconds = 3;
+    mainCountdownNumber = 1000;
+    inGameTimer = 25;
+    afterRoundTimer = 70;
+  }
+  
+  void resetEntities() {
+    player.didSwingHammer = false;
+    enemy.didSwingHammer = false;
+    player.didDodgeHammer = false;
+    enemy.didDodgeHammer= false;
+    player.wasHit = false;
+    enemy.wasHit= false;
+  }
+
 public:
   void update() 
   {
@@ -273,10 +272,72 @@ public:
     --afterRoundTimer;
     if (afterRoundTimer == 0)
     {
-      inGame = false;
+      resetCardNumbers();
       resetTimers();
-      countDown();
+      resetEntities();
       gameState = GameState::PlayGame;
+    }
+  }
+  
+  void draw() 
+  {
+    // Player flickering
+    if (enemy.didDodgeHammer)
+    {
+      if (afterRoundTimer % 14 == 0)
+      {
+        Sprites::drawErase(player.x, player.y, player.images.holdImage, 0);
+        player.hideCard();
+      }
+    }
+    else if (enemy.didSwingHammer)
+    {
+      if (afterRoundTimer % 14 == 0)
+      {
+        Sprites::drawErase(player.x, player.y, player.images.hitImage, 0);
+        player.hideCard();
+      }
+    }
+    
+    // Everything else
+    if (player.didSwingHammer)
+    {
+      if (player.cardNumber >= enemy.cardNumber)
+      {
+        if (afterRoundTimer % 14 == 0)
+        {
+          Sprites::drawErase(enemy.x, enemy.y, enemy.images.hitImage, 0);
+          enemy.hideCard();
+        }
+      }
+      else 
+      {
+        if (afterRoundTimer % 14 == 0)
+        {
+          Sprites::drawErase(player.x, player.y, player.images.swingImage, 0);
+          player.hideCard();
+        }
+      }
+    }
+    
+    if (player.didDodgeHammer)
+    {
+      if (player.cardNumber < enemy.cardNumber)
+      {
+        if (afterRoundTimer % 14 == 0)
+        {
+          Sprites::drawErase(enemy.x, enemy.y, enemy.images.holdImage, 0);
+          enemy.hideCard();
+        }
+      }
+      else 
+      {
+        if (afterRoundTimer % 14 == 0)
+        {
+          Sprites::drawErase(player.x, player.y, player.images.dodgeImage, 0);
+          player.hideCard();
+        }
+      }
     }
   }
 };

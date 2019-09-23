@@ -19,8 +19,6 @@ uint16_t tcounter { 3 }; // 3 second countdown
 uint16_t seconds { 0 };
 unsigned long timer;
 
-bool inGame { false };
-
 // Amount of time for player to press a button
 uint8_t inGameTimer { 25 };
 
@@ -34,10 +32,10 @@ uint16_t mainCountdownNumber { 1000 };
 uint8_t mainTimerSeconds { 3 };
 
 // Increase to slow down time between 3...2...1
-uint8_t timeBetweenCounts { 40 };
+uint8_t timeBetweenCounts { 25 };
 
 // Amount of time to pause between rounds
-uint8_t afterRoundTimer { 75 };
+uint8_t afterRoundTimer { 70 };
 
 // uint8_t randomMod { random(30, 51) };
 
@@ -70,6 +68,7 @@ struct Entity
   uint8_t y;
   uint8_t score; // max 99
   uint8_t cardNumber;
+  bool wasHit;
   bool isHoldingCard;
   bool didSwingHammer;
   bool didDodgeHammer;
@@ -102,6 +101,7 @@ Entity player
   false,
   false,
   false,
+  false,
   {
     character,
     characterHold,
@@ -117,6 +117,7 @@ Entity enemy
   32,
   0,
   0,
+  false,
   false,
   false,
   false,

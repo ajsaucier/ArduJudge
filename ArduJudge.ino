@@ -40,6 +40,7 @@ void loop() {
       
     case GameState::AfterRound:
       afterRoundState.update();
+      afterRoundState.draw();
       break;
 
     case GameState::GameOver:
