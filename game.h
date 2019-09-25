@@ -122,7 +122,7 @@ IntroductionState introductionState;
 
 class PlayGameState
 {
-    // TODO: move countDown to PlayGameState
+private:
   int countDown() {
     if (mainCountdownNumber > 0) 
     {
@@ -244,6 +244,7 @@ PlayGameState playGameState;
 
 class AfterRoundState
 {
+private:
   void resetTimers() 
   {
     mainTimerSeconds = 3;
@@ -281,58 +282,43 @@ public:
   
   void draw() 
   {
-    // Player flickering
-    if (enemy.didDodgeHammer)
+    if (afterRoundTimer % 14 == 0)
     {
-      if (afterRoundTimer % 14 == 0)
+      // Player flickering
+      if (enemy.didDodgeHammer)
       {
         Sprites::drawErase(player.x, player.y, player.images.holdImage, 0);
         player.hideCard();
       }
-    }
-    else if (enemy.didSwingHammer)
-    {
-      if (afterRoundTimer % 14 == 0)
+      else if (enemy.didSwingHammer)
       {
         Sprites::drawErase(player.x, player.y, player.images.hitImage, 0);
         player.hideCard();
       }
-    }
-    
-    // Everything else
-    if (player.didSwingHammer)
-    {
-      if (player.cardNumber >= enemy.cardNumber)
+      
+      // Everything else
+      if (player.didSwingHammer)
       {
-        if (afterRoundTimer % 14 == 0)
+        if (player.cardNumber >= enemy.cardNumber)
         {
           Sprites::drawErase(enemy.x, enemy.y, enemy.images.hitImage, 0);
           enemy.hideCard();
         }
-      }
-      else 
-      {
-        if (afterRoundTimer % 14 == 0)
+        else 
         {
           Sprites::drawErase(player.x, player.y, player.images.swingImage, 0);
           player.hideCard();
         }
       }
-    }
-    
-    if (player.didDodgeHammer)
-    {
-      if (player.cardNumber < enemy.cardNumber)
+      
+      if (player.didDodgeHammer)
       {
-        if (afterRoundTimer % 14 == 0)
+        if (player.cardNumber < enemy.cardNumber)
         {
           Sprites::drawErase(enemy.x, enemy.y, enemy.images.holdImage, 0);
           enemy.hideCard();
         }
-      }
-      else 
-      {
-        if (afterRoundTimer % 14 == 0)
+        else 
         {
           Sprites::drawErase(player.x, player.y, player.images.dodgeImage, 0);
           player.hideCard();
